@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>McVaadin</title>
+</head>
+<body>
+McVaadin is extension library to
+<a href="http://www.vaadin.com">Vaadin UI framework</a>
+. It offers a, alternative - scripting inspired way of building user
+interfaces with Vaadin.
+<p>Simply, the amount of code counts. With Vaadin this:
+<pre>
+import com.vaadin.Application;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Window;
+
+public class HelloWorld extends Application {
+    public void init() {
+        final Window main = new Window("Hello window");
+        setMainWindow(main);
+        main.addComponent(new Label("Hello World!"));
+    }
+}
+</pre>
+becomes this with McVaadin:
+<pre>
+import com.googlecode.mcvaadin.McApplication;
+
+public class HelloWorld extends McApplication {
+    public void ui() {
+        label("Hello World!"));
+    }
+}
+</pre>
+
+</body>
+</html>

@@ -8,7 +8,7 @@
     <param-value>false</param-value>
   </context-param>
   <servlet>
-    <servlet-name>Se Test</servlet-name>
+    <servlet-name>McVaadin Test</servlet-name>
     <servlet-class>
   	com.vaadin.terminal.gwt.server.ApplicationServlet</servlet-class>
     <init-param>
@@ -19,15 +19,7 @@
     </init-param>
   </servlet>
   <servlet-mapping>
-    <servlet-name>Se Test</servlet-name>
+    <servlet-name>McVaadin Test</servlet-name>
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
-  <welcome-file-list>
-    <welcome-file>index.html</welcome-file>
-    <welcome-file>index.htm</welcome-file>
-    <welcome-file>index.jsp</welcome-file>
-    <welcome-file>default.html</welcome-file>
-    <welcome-file>default.htm</welcome-file>
-    <welcome-file>default.jsp</welcome-file>
-  </welcome-file-list>
 </web-app>

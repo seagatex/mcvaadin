@@ -2,6 +2,8 @@ package com.googlecode.mcvaadin.helpers;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.googlecode.mcvaadin.McApplication;
 import com.googlecode.mcvaadin.McComponent;
@@ -10,6 +12,7 @@ import com.googlecode.mcvaadin.McListener;
 import com.googlecode.mcvaadin.McWindow;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.Action;
 import com.vaadin.terminal.ExternalResource;
 import com.vaadin.terminal.ParameterHandler;
 import com.vaadin.terminal.URIHandler;
@@ -25,6 +28,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -120,11 +124,10 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     public Window window(String caption, int width, int height) {
         Window c = window(caption);
-        c.setWidth(width+"px");
-        c.setHeight(height+"px");
+        c.setWidth(width + "px");
+        c.setHeight(height + "px");
         return c;
     }
-
 
     public Label h1(String str) {
         return labelWithStyle(str, "h1");
@@ -148,6 +151,27 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     public Label html(String str) {
         Label c = label();
         c.setContentMode(Label.CONTENT_RAW);
+        c.setValue(str);
+        return c;
+    }
+
+    /**
+     * We set the size undefined by default.
+     *
+     */
+    @Override
+    public Label label() {
+        Label c = super.label();
+        c.setSizeUndefined();
+        return c;
+    }
+
+    /**
+     * Override to set the content instead of the caption.
+     */
+    @Override
+    public Label label(String str) {
+        Label c = label();
         c.setValue(str);
         return c;
     }
@@ -217,8 +241,8 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     }
 
     /**
-     * Create a "confirmed button". The user is presented a confirmation message before
-     * the event is sent and listener invoked.
+     * Create a "confirmed button". The user is presented a confirmation message
+     * before the event is sent and listener invoked.
      *
      * @param caption
      * @param description
@@ -228,12 +252,14 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
      * @return
      */
     public Button confirmbutton(final String caption, final String description,
-            final String okCaption, final String cancelCaption, final McListener listener) {
+            final String okCaption, final String cancelCaption,
+            final McListener listener) {
         Button b = button(caption, new McListener() {
 
             @Override
             public void exec(McEvent e) throws Exception {
-                confirm(caption, description, okCaption, cancelCaption, listener);
+                confirm(caption, description, okCaption, cancelCaption,
+                        listener);
             }
         });
         return b;
@@ -248,8 +274,9 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
      * @param listener
      * @return
      */
-    public Button confirmbutton(final String caption, final String description, final McListener listener) {
-        return confirmbutton(caption, description, null,null,listener);
+    public Button confirmbutton(final String caption, final String description,
+            final McListener listener) {
+        return confirmbutton(caption, description, null, null, listener);
     }
 
     /**
@@ -300,6 +327,18 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     }
 
     /**
+     * Override to put spacing on by default.
+     *
+     */
+    @Override
+    public Panel panel() {
+        Panel c = super.panel();
+        VerticalLayout root = (VerticalLayout) c.getContent();
+        root.setSpacing(true);
+        return c;
+    }
+
+    /**
      * Set component alignment.
      *
      * If the currently focused component container implements the
@@ -320,8 +359,8 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
      * Set component expand ratio.
      *
      * If the currently focused component container implements the
-     * {@link AbstractOrderedLayout}, this function applies the requested expand ratio for
-     * the given sub-component.
+     * {@link AbstractOrderedLayout}, this function applies the requested expand
+     * ratio for the given sub-component.
      *
      * @param component
      * @param ratio
@@ -334,6 +373,81 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         }
     }
 
+    // ---------------------------------------------------------------------------------------------------
+    // --------------------------------- Key Binding Helpers
+    // ---------------------------------------------------------------------------------------------------
+
+    /**
+     * Bind a keyboard key to a button.
+     *
+     */
+    public Button bindKey(Button b, int key) {
+        return bindKey(b, key, null);
+    }
+
+    /**
+     * Bind a keyboard key to a button.
+     *
+     */
+    public Button bindKey(Button b, int key, int modifier) {
+        return bindKey(b, key, new int[] {modifier});
+    }
+
+    /**
+     * Bind a keyboard key to a button. This finds the {@link Action.Container}
+     * parent of this button that supports keyboard listener and installs a
+     * listener there to invoke a button click when desired key combination is
+     * pressed.
+     *
+     * @param b
+     * @param key
+     * @param modifiers
+     * @return
+     */
+    public Button bindKey(final Button b, int key, int[] modifiers) {
+        if (b == null) {
+            return b;
+        }
+
+        Action.Container ac = (Panel) Utils.findParent(b,
+                Action.Container.class);
+        if (ac == null) {
+            ac = McApplication.current().getMainWindow();
+        }
+
+        if (ac == null) {
+            return b;
+        }
+
+        bindKey(ac, key, modifiers, new McListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void exec(McEvent e) throws Exception {
+                // We click the button by simulating a client-side event.
+                Map vars = new HashMap();
+                vars.put("state",new Boolean(!(Boolean)b.getValue()));
+                b.changeVariables(this, vars);
+            }
+        });
+
+        return b;
+    }
+
+    /**
+     * Bind a keyboard key to a button. This finds the parent of this button
+     * that supports keyboard listener and installs a listener there to invoke
+     * when desired key combination is pressed.
+     *
+     * @param actionContainer
+     * @param key
+     * @param modifiers
+     */
+    public void bindKey(Action.Container actionContainer, int key,
+            int[] modifiers, McListener listener) {
+        actionContainer.addActionHandler(new KeyboardHandlerImpl(key,
+                modifiers, listener));
+    }
 
     // ---------------------------------------------------------------------------------------------------
     // --------------------------------- Data Binding Helpers
@@ -345,6 +459,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
             bic.addBean(object);
         }
         table.setContainerDataSource(bic);
+        table.setReadThrough(true);
         return table;
     }
 
@@ -369,7 +484,6 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         }
         return form;
     }
-
 
     // ---------------------------------------------------------------------------------------------------
     // --------------------------------- Delegate Functions for translator
@@ -458,7 +572,8 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return c;
     }
 
-    /** Create and select a HorizontalLayout.
+    /**
+     * Create and select a HorizontalLayout.
      *
      * This is the same as <code>with(horizontallayout())</code>.
      *
@@ -470,8 +585,8 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return c;
     }
 
-
-    /** Create and select a HorizontalLayout.
+    /**
+     * Create and select a HorizontalLayout.
      *
      * This is the same as <code>with(verticallayout())</code>.
      *

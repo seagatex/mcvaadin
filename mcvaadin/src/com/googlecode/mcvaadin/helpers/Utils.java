@@ -40,7 +40,6 @@ import com.googlecode.mcvaadin.external.apache.CharChunk;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.ComponentContainer;
 
 /**
  * A set of generic utility functions.
@@ -97,12 +96,11 @@ public class Utils {
         return str == null || "".equals(str.trim());
     }
 
-    public static Component findParent(Component c,
-            Class<ComponentContainer> clazz) {
-        if (c == null || clazz.isAssignableFrom(c.getClass())) {
+    public static Component findParent(Component c, Class<?> parentType) {
+        if (c == null || parentType.isAssignableFrom(c.getClass())) {
             return c;
         }
-        return findParent(c.getParent(), clazz);
+        return findParent(c.getParent(), parentType);
     }
 
     public static String toString(InputStream stream, String enc,
@@ -228,9 +226,10 @@ public class Utils {
         String inputLine = null;
         try {
             URL target = new URL(url);
-            in = new BufferedReader(new InputStreamReader(target.openStream(), encoding));
+            in = new BufferedReader(new InputStreamReader(target.openStream(),
+                    encoding));
             while ((inputLine = in.readLine()) != null) {
-                res.append(inputLine +"\n");
+                res.append(inputLine + "\n");
             }
             return res.toString();
         } catch (IOException e) {

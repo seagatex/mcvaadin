@@ -3,10 +3,11 @@ package com.googlecode.mcvaadin.helpers;
 import com.googlecode.mcvaadin.McEvent;
 import com.googlecode.mcvaadin.McListener;
 import com.googlecode.mcvaadin.McWindow;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.Notification;
@@ -96,10 +97,10 @@ public class UserMessages {
 
     private String formatDescription(String description) {
         if (description != null) {
-            // TODO: Toolkit layout tweak
-            if (!description.startsWith("\n")) {
-                description = "\n" + description;
-            }
+            // // TODO: Vaadin layout tweak
+            // if (!description.startsWith("\n")) {
+            // description = "\n" + description;
+            // }
             description = Utils.escapeXML(description);
             description = description.replaceAll("\n", "<br />");
             if (description.length() > 80) {
@@ -140,7 +141,7 @@ public class UserMessages {
             title = CONFIRM_OK_TITLE;
         }
         if (cancelTitle == null) {
-            cancelTitle= CONFIRM_CANCEL_TITLE;
+            cancelTitle = CONFIRM_CANCEL_TITLE;
         }
         if (okTitle == null) {
             okTitle = CONFIRM_OK_TITLE;
@@ -180,6 +181,7 @@ public class UserMessages {
 
         confirm.setWidth((txtWidth + hmargin) + "px");
         confirm.setHeight((vmargin + txtHeight + btnHeight) + "px");
+        confirm.getContent().setSizeFull();
 
         // Modal position in the center
         confirm.center();
@@ -188,12 +190,15 @@ public class UserMessages {
         // Create content
         final UIBuilder h = new UIBuilder(confirm);
         Label text = h.label(message);
+        h.expand(text, 1f);
+
         HorizontalLayout buttons = h.horizontallayout();
         buttons.setHeight(btnHeight + "px");
         text.setWidth(txtWidth + "px");
         text.setHeight(txtHeight + "px");
-        ((VerticalLayout) buttons.getParent()).setComponentAlignment(buttons,
-                Alignment.BOTTOM_RIGHT);
+        h.align(buttons, Alignment.BOTTOM_RIGHT);
+
+        // Create a listener for buttons
         McListener btnListener = new McListener() {
 
             private static final long serialVersionUID = 517796258497875393L;
@@ -208,10 +213,13 @@ public class UserMessages {
             }
 
         };
-        // TODO: Keyboard listener helpers
         h.with(buttons);
-        h.button(cancelTitle, btnListener).setData("CANCEL"); // .setKey(SeConstants.Key.ESCAPE);
-        h.button(okTitle, btnListener).setData("OK"); // .setKey(SeConstants.Key.ENTER);
+        Button cancel = h.button(cancelTitle, btnListener);
+        cancel.setData("CANCEL");
+        h.bindKey(cancel, KeyCode.ESCAPE);
+        Button ok = h.button(okTitle, btnListener);
+        ok.setData("OK");
+        h.bindKey(ok, KeyCode.ENTER);
         return confirm;
     }
 

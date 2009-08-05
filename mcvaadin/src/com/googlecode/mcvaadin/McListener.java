@@ -89,7 +89,7 @@ public abstract class McListener implements Button.ClickListener,
 
             }
         } catch (Throwable t) {
-            error("Unhandled exception", t);
+            unhandledError("Unhandled exception", t);
         }
         return null;
     }
@@ -100,7 +100,7 @@ public abstract class McListener implements Button.ClickListener,
      * @param msg
      * @param t
      */
-    private void error(String msg, Throwable t) {
+    public void unhandledError(String msg, Throwable t) {
         McApplication app = McApplication.current();
         if (app != null && app.getMsg() != null) {
             app.getMsg().error(msg, t);
@@ -115,7 +115,7 @@ public abstract class McListener implements Button.ClickListener,
         try {
             execOnce(new McEvent(parameters));
         } catch (Throwable t) {
-            error("Unhandled exception", t);
+            unhandledError("Unhandled exception", t);
         }
     }
 
@@ -123,7 +123,7 @@ public abstract class McListener implements Button.ClickListener,
         try {
             execOnce(new McEvent(event));
         } catch (Throwable t) {
-            error("Unhandled exception", t);
+            unhandledError("Unhandled exception", t);
         }
     }
 
@@ -131,7 +131,7 @@ public abstract class McListener implements Button.ClickListener,
         try {
             execOnce(new McEvent(event));
         } catch (Throwable t) {
-            error("Unhandled exception", t);
+            unhandledError("Unhandled exception", t);
         }
     }
 
@@ -141,7 +141,7 @@ public abstract class McListener implements Button.ClickListener,
             execOnce(e);
             return e.getReturnComponent();
         } catch (Throwable t) {
-            error("Unhandled exception", t);
+            unhandledError("Unhandled exception", t);
         }
         return null;
     }
@@ -150,7 +150,7 @@ public abstract class McListener implements Button.ClickListener,
         try {
             execOnce(new McEvent(e));
         } catch (Throwable t) {
-            error("Unhandled exception", t);
+            unhandledError("Unhandled exception", t);
         }
     }
 

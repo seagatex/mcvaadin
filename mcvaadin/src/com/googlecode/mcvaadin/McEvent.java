@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.Map;
 
 import com.vaadin.data.Property;
+import com.vaadin.event.ShortcutAction;
 import com.vaadin.terminal.DownloadStream;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -48,6 +49,8 @@ public class McEvent {
     private Object itemId;
     private Object columnId;
     private CloseEvent closeEvent;
+    private int[] modifiers;
+    private int key;
 
     public McEvent(Upload.FinishedEvent event, byte[] data) {
         finishedEvent = event;
@@ -79,6 +82,17 @@ public class McEvent {
 
     public McEvent(CloseEvent e) {
         closeEvent = e;
+    }
+
+    /**
+     * New keyboard event.
+     *
+     * @param key
+     * @param modifiers
+     */
+    public McEvent(int key, int[] modifiers) {
+        this.key = key;
+        this.modifiers = modifiers;
     }
 
     public String getURI() {
@@ -185,7 +199,7 @@ public class McEvent {
     }
 
     public Window getWindow() {
-        return closeEvent != null? closeEvent.getWindow():null;
+        return closeEvent != null ? closeEvent.getWindow() : null;
     }
 
     public Object getItemId() {
@@ -203,6 +217,26 @@ public class McEvent {
      */
     public Button getButton() {
         return clickEvent != null ? clickEvent.getButton() : null;
+    }
+
+    /**
+     * Key code if this was a keyboard event.
+     *
+     * @see ShortcutAction.KeyCode
+     * @return
+     */
+    public int getKey() {
+        return key;
+    }
+
+    /**
+     * Modifier keys if this was a keyboard event.
+     *
+     * @see ShortcutAction.ModifierKey
+     * @return
+     */
+    public int[] getModifiers() {
+        return modifiers;
     }
 
 }

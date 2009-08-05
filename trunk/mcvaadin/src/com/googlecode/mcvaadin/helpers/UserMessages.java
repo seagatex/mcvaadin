@@ -132,8 +132,19 @@ public class UserMessages {
                 CONFIRM_CANCEL_TITLE, listener);
     }
 
-    public Window confirm(String title, String message, final String okTitle,
+    public Window confirm(String title, String message, String okTitle,
             String cancelTitle, final McListener listener) {
+
+        // Check for default captions
+        if (title == null) {
+            title = CONFIRM_OK_TITLE;
+        }
+        if (cancelTitle == null) {
+            cancelTitle= CONFIRM_CANCEL_TITLE;
+        }
+        if (okTitle == null) {
+            okTitle = CONFIRM_OK_TITLE;
+        }
 
         // Create a confirm dialog
         final McWindow confirm = new McWindow(title);
@@ -189,7 +200,7 @@ public class UserMessages {
 
             @Override
             public void exec(McEvent e) throws Exception {
-                if (okTitle.equals(e.getClickEvent().getButton().getCaption())) {
+                if ("OK".equals(e.getClickEvent().getButton().getData())) {
                     // Set event as data only when "ok" is clicked
                     confirm.setData(e);
                 }
@@ -199,8 +210,8 @@ public class UserMessages {
         };
         // TODO: Keyboard listener helpers
         h.with(buttons);
-        h.button(cancelTitle, btnListener); // .setKey(SeConstants.Key.ESCAPE);
-        h.button(okTitle, btnListener); // .setKey(SeConstants.Key.ENTER);
+        h.button(cancelTitle, btnListener).setData("CANCEL"); // .setKey(SeConstants.Key.ESCAPE);
+        h.button(okTitle, btnListener).setData("OK"); // .setKey(SeConstants.Key.ENTER);
         return confirm;
     }
 

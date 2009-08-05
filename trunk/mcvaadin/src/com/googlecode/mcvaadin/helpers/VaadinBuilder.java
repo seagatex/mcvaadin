@@ -872,6 +872,18 @@ public class VaadinBuilder {
         }
     }
 
+    /** Remove component from current component container. */
+    public void remove(Component c) {
+        if (c != null) {
+            cc.removeComponent(c);
+        }
+    }
+
+    /** Remove all components from current component container. */
+    public void removeAll() {
+        cc.removeAllComponents();
+    }
+
     /** Move build focus to previous component container. */
     public void endWith() {
         with(previousComponentContainer(), false);

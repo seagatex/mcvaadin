@@ -34,10 +34,9 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.apache.catalina.util.Base64;
-import org.apache.tomcat.util.buf.ByteChunk;
-import org.apache.tomcat.util.buf.CharChunk;
-
+import com.googlecode.mcvaadin.external.apache.Base64;
+import com.googlecode.mcvaadin.external.apache.ByteChunk;
+import com.googlecode.mcvaadin.external.apache.CharChunk;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.ui.Component;
@@ -217,6 +216,10 @@ public class Utils {
     }
 
     public static String readURL(String url) {
+        return readURL(DEFAULT_STRING_ENCODING);
+    }
+
+    public static String readURL(String url, String encoding) {
         if (!isURL(url)) {
             return null;
         }
@@ -225,9 +228,9 @@ public class Utils {
         String inputLine = null;
         try {
             URL target = new URL(url);
-            in = new BufferedReader(new InputStreamReader(target.openStream()));
+            in = new BufferedReader(new InputStreamReader(target.openStream(), encoding));
             while ((inputLine = in.readLine()) != null) {
-                res.append(inputLine);
+                res.append(inputLine +"\n");
             }
             return res.toString();
         } catch (IOException e) {

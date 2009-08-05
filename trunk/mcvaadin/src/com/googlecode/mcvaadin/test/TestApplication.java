@@ -20,7 +20,7 @@ public class TestApplication extends McApplication {
         label("McVaadin is the scripting son of Vaadin.");
 
         // HelloWorld sample application
-        add(new McComponent() {
+        getMainWindow().addComponent(new McComponent() {
             @Override
             public void ui() {
                 with(panel("HelloWorld Sample"));

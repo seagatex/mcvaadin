@@ -1,17 +1,35 @@
 package com.googlecode.mcvaadin.helpers;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import com.googlecode.mcvaadin.McApplication;
 import com.googlecode.mcvaadin.McComponent;
+import com.googlecode.mcvaadin.McEvent;
 import com.googlecode.mcvaadin.McListener;
 import com.googlecode.mcvaadin.McWindow;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.terminal.ExternalResource;
+import com.vaadin.terminal.ParameterHandler;
+import com.vaadin.terminal.URIHandler;
+import com.vaadin.ui.AbstractOrderedLayout;
+import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.ComponentContainer;
+import com.vaadin.ui.Form;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
+import com.vaadin.ui.Link;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.Layout.AlignmentHandler;
 
 /**
  * User interface factory class.
@@ -42,9 +60,12 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     private UserMessages msg;
 
+    private Translator translator;
+
     public UIBuilder(ComponentContainer cc) {
         super(cc);
         msg = McApplication.current().getMsg();
+        translator = McApplication.current().getTranslator();
     }
 
     /** Create new builder with given root component container. */
@@ -81,61 +102,29 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return null;
     }
 
-    // TODO: Translation functions
-    // private ResourceBundle resourceBundle = null;
-    //
-    // private String resourceBundleName = null;
-    //
-    // public String tr(String str) {
-    // if (resourceBundle == null) {
-    // resourceBundle = ResourceBundle.getBundle(resourceBundleName);
-    // }
-    // return resourceBundle.getString(str);
-    // }
-    //
-    // public String tr(String str, Object... arguments) {
-    // if (resourceBundle == null) {
-    // resourceBundle = ResourceBundle.getBundle(resourceBundleName);
-    // }
-    // String tr = resourceBundle.getString(str);
-    // return com.google.code.mcvaadin.se.SeUtils.format(tr, arguments);
-    // }
-
-    // /**
-    // * Translate a string using current locale. his is effectively same as
-    // * getApp().tr(String). See requirements for application in
-    // * {@link #getApp()}.
-    // *
-    // * @param str
-    // * @return
-    // */
-    // public String tr(String str) {
-    // MCApplication a = getApp();
-    // if (a != null) {
-    // return a.tr(str);
-    // }
-    // return str;
-    // }
-
     // ---------------------------------------------------------------------------------------------------
     // --------------------------------- Custom component constructors
     // ---------------------------------------------------------------------------------------------------
 
     /**
-     * Override for better defaults.
+     * Override window for better defaults.
      *
      */
     @Override
     public Window window() {
         Window w = super.window();
-
-        // Make sure the size full is set
-        w.getContent().setSizeFull();
-
         // Set margin on by defaults
         ((Layout) w.getContent()).setMargin(true);
         return w;
     }
+
+    public Window window(String caption, int width, int height) {
+        Window c = window(caption);
+        c.setWidth(width+"px");
+        c.setHeight(height+"px");
+        return c;
+    }
+
 
     public Label h1(String str) {
         return labelWithStyle(str, "h1");
@@ -149,6 +138,13 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return html("<hr />");
     }
 
+    public Label pre(String str) {
+        Label c = label();
+        c.setContentMode(Label.CONTENT_PREFORMATTED);
+        c.setValue(str);
+        return c;
+    }
+
     public Label html(String str) {
         Label c = label();
         c.setContentMode(Label.CONTENT_RAW);
@@ -159,6 +155,19 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     private Label labelWithStyle(String str, String style) {
         Label c = label(str);
         c.setStyleName(style);
+        return c;
+    }
+
+    /**
+     * Create a textfield of given caption and default value.
+     *
+     * @param caption
+     * @param value
+     * @return
+     */
+    public TextField textfield(String caption, String value) {
+        TextField c = textfield(caption);
+        c.setValue(value);
         return c;
     }
 
@@ -177,10 +186,209 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return c;
     }
 
+    /**
+     * Create a textfield of given size and default value.
+     *
+     * @param caption
+     * @param value
+     * @param cols
+     * @param rows
+     * @return
+     */
+    public TextField textfield(String caption, String value, int cols, int rows) {
+        TextField c = textfield(caption);
+        c.setValue(value);
+        c.setColumns(cols);
+        c.setRows(rows);
+        return c;
+    }
+
     public GridLayout gridlayout(int w, int h) {
         GridLayout c = new GridLayout(w, h);
         add(c);
         return c;
+    }
+
+    /**
+     * Alias for {@link #label(String)}.
+     */
+    public Label text(String text) {
+        return label(text);
+    }
+
+    /**
+     * Create a "confirmed button". The user is presented a confirmation message before
+     * the event is sent and listener invoked.
+     *
+     * @param caption
+     * @param description
+     * @param okCaption
+     * @param cancelCaption
+     * @param listener
+     * @return
+     */
+    public Button confirmbutton(final String caption, final String description,
+            final String okCaption, final String cancelCaption, final McListener listener) {
+        Button b = button(caption, new McListener() {
+
+            @Override
+            public void exec(McEvent e) throws Exception {
+                confirm(caption, description, okCaption, cancelCaption, listener);
+            }
+        });
+        return b;
+    }
+
+    /**
+     * Create a "confirmed" button. The user is presented a confirmation before
+     * the click event is sent.
+     *
+     * @param caption
+     * @param description
+     * @param listener
+     * @return
+     */
+    public Button confirmbutton(final String caption, final String description, final McListener listener) {
+        return confirmbutton(caption, description, null,null,listener);
+    }
+
+    /**
+     * Add an {@link URIHandler} to current window.
+     *
+     * @param handler
+     */
+    public void addUriHandler(URIHandler handler) {
+        Window w = cc.getWindow();
+        if (w == null) {
+            w = getMainWin();
+        }
+
+        if (w != null && handler != null) {
+            w.addURIHandler(handler);
+        }
+    }
+
+    /**
+     * Add a {@link ParameterHandler} to current window.
+     *
+     * @param handler
+     */
+    public void addParamHandler(ParameterHandler handler) {
+        Window w = cc.getWindow();
+        if (w == null) {
+            w = getMainWin();
+        }
+
+        if (w != null && handler != null) {
+            w.addParameterHandler(handler);
+        }
+    }
+
+    /**
+     * Create a new link.
+     *
+     * @param linkText
+     * @param linkUrl
+     * @param targetName
+     * @return
+     */
+    public Link link(String linkText, String linkUrl, String targetName) {
+        Link c = link(linkText);
+        c.setResource(new ExternalResource(linkUrl));
+        c.setTargetName(targetName);
+        return c;
+    }
+
+    /**
+     * Set component alignment.
+     *
+     * If the currently focused component container implements the
+     * {@link AlignmentHandler}, this function applies the requested alignment
+     * to given sub-component.
+     *
+     * @param component
+     * @param alignment
+     */
+    public void align(Component component, Alignment alignment) {
+        if (cc instanceof Layout.AlignmentHandler) {
+            Layout.AlignmentHandler l = (Layout.AlignmentHandler) cc;
+            l.setComponentAlignment(component, alignment);
+        }
+    }
+
+    /**
+     * Set component expand ratio.
+     *
+     * If the currently focused component container implements the
+     * {@link AbstractOrderedLayout}, this function applies the requested expand ratio for
+     * the given sub-component.
+     *
+     * @param component
+     * @param ratio
+     * @see AbstractOrderedLayout
+     */
+    public void expand(Component component, float ratio) {
+        if (cc instanceof AbstractOrderedLayout) {
+            AbstractOrderedLayout l = (AbstractOrderedLayout) cc;
+            l.setExpandRatio(component, ratio);
+        }
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------
+    // --------------------------------- Data Binding Helpers
+    // ---------------------------------------------------------------------------------------------------
+    public Table bindData(Table table, Collection<?> data) {
+        BeanItemContainer<Object> bic = new BeanItemContainer<Object>(data
+                .iterator().next().getClass());
+        for (Object object : data) {
+            bic.addBean(object);
+        }
+        table.setContainerDataSource(bic);
+        return table;
+    }
+
+    public AbstractSelect bindData(AbstractSelect select, Collection<?> data,
+            String captionPropertyId) {
+        BeanItemContainer<Object> bic = new BeanItemContainer<Object>(data
+                .iterator().next().getClass());
+        for (Object object : data) {
+            bic.addBean(object);
+        }
+        select.setContainerDataSource(bic);
+        select.setItemCaptionPropertyId(captionPropertyId);
+        return select;
+    }
+
+    public Form bindData(Form form, Object data, String[] properties) {
+        if (data != null) {
+            form.setItemDataSource(new BeanItem(data));
+            form.setVisibleItemProperties(properties);
+        } else {
+            form.setItemDataSource(null);
+        }
+        return form;
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------
+    // --------------------------------- Delegate Functions for translator
+    // ---------------------------------------------------------------------------------------------------
+
+    public String getResourceBundleName() {
+        return translator.getResourceBundleName();
+    }
+
+    public void setResourceBundleName(String resourceBundleName) {
+        translator.setResourceBundleName(resourceBundleName);
+    }
+
+    public String tr(String str, Object... arguments) {
+        return translator.tr(str, arguments);
+    }
+
+    public String tr(String str) {
+        return translator.tr(str);
     }
 
     // ---------------------------------------------------------------------------------------------------
@@ -234,6 +442,53 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     public void notification(String message) {
         msg.notification(message);
+    }
+
+    @Override
+    public HorizontalLayout horizontallayout() {
+        HorizontalLayout c = super.horizontallayout();
+        c.setSpacing(true);
+        return c;
+    }
+
+    @Override
+    public VerticalLayout verticallayout() {
+        VerticalLayout c = super.verticallayout();
+        c.setSpacing(true);
+        return c;
+    }
+
+    /** Create and select a HorizontalLayout.
+     *
+     * This is the same as <code>with(horizontallayout())</code>.
+     *
+     * @return
+     */
+    public HorizontalLayout horizontal() {
+        HorizontalLayout c = horizontallayout();
+        with(c);
+        return c;
+    }
+
+
+    /** Create and select a HorizontalLayout.
+     *
+     * This is the same as <code>with(verticallayout())</code>.
+     *
+     * @return
+     */
+    public VerticalLayout vertical() {
+        VerticalLayout c = verticallayout();
+        with(c);
+        return c;
+    }
+
+    @Override
+    public Table table() {
+        Table c = super.table();
+        c.setSelectable(true);
+        c.setSortDisabled(false);
+        return c;
     }
 
 }

@@ -16,8 +16,10 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Upload;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Upload.FinishedEvent;
+import com.vaadin.ui.Window.CloseEvent;
 
 /**
  * A generic listener for events of the Vaadin UI framework. By implementing the
@@ -34,7 +36,8 @@ import com.vaadin.ui.Upload.FinishedEvent;
  */
 public abstract class McListener implements Button.ClickListener,
         Property.ValueChangeListener, URIHandler, ParameterHandler,
-        Upload.Receiver, Upload.FinishedListener, Table.ColumnGenerator {
+        Upload.Receiver, Upload.FinishedListener, Table.ColumnGenerator,
+        Window.CloseListener {
 
     /** Generated Serial Version UID. */
     private static final long serialVersionUID = 763117584566103799L;
@@ -143,6 +146,14 @@ public abstract class McListener implements Button.ClickListener,
         return null;
     }
 
+    public void windowClose(CloseEvent e) {
+        try {
+            execOnce(new McEvent(e));
+        } catch (Throwable t) {
+            error("Unhandled exception", t);
+        }
+    }
+
     /**
      * Process the event. This calls the exec inside a lock to avoid double
      * execution (recursion) of the same events.
@@ -165,6 +176,8 @@ public abstract class McListener implements Button.ClickListener,
 
         try {
             exec(e);
+        } catch (Exception ex) {
+            throw ex;
         } finally {
             // Release the lock
             lock = false;

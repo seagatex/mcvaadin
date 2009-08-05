@@ -9,7 +9,9 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Upload;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.Upload.FinishedEvent;
+import com.vaadin.ui.Window.CloseEvent;
 
 /**
  * Generic event wrapper for Vaadin events.
@@ -45,6 +47,7 @@ public class McEvent {
     private Table table;
     private Object itemId;
     private Object columnId;
+    private CloseEvent closeEvent;
 
     public McEvent(Upload.FinishedEvent event, byte[] data) {
         finishedEvent = event;
@@ -74,6 +77,10 @@ public class McEvent {
         this.columnId = columnId;
     }
 
+    public McEvent(CloseEvent e) {
+        closeEvent = e;
+    }
+
     public String getURI() {
         return URI;
     }
@@ -88,6 +95,10 @@ public class McEvent {
 
     public Button.ClickEvent getClickEvent() {
         return clickEvent;
+    }
+
+    public Window.CloseEvent getCloseEvent() {
+        return closeEvent;
     }
 
     public Property.ValueChangeEvent getValueChangeEvent() {
@@ -171,6 +182,10 @@ public class McEvent {
 
     public Table getTable() {
         return table;
+    }
+
+    public Window getWindow() {
+        return closeEvent != null? closeEvent.getWindow():null;
     }
 
     public Object getItemId() {

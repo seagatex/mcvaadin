@@ -56,7 +56,7 @@ public class Utils {
     public static final String VALID_NUMBERS = "1234567890";
     public static final String VALID_EMAIL_CHARACTERS = "@.-"
             + VALID_CHARACTERS + VALID_NUMBERS;
-    public static final String VALID_URI_CHARACTERS = ".-" + VALID_CHARACTERS
+    public static final String VALID_URI_CHARACTERS = ".-_" + VALID_CHARACTERS
             + VALID_NUMBERS;
     public static String DEFAULT_STRING_ENCODING = "iso-8859-1";
     public static DateFormat DEFAULT_DATEFORMAT = DateFormat
@@ -214,7 +214,7 @@ public class Utils {
     }
 
     public static String readURL(String url) {
-        return readURL(DEFAULT_STRING_ENCODING);
+        return readURL(url, DEFAULT_STRING_ENCODING);
     }
 
     public static String readURL(String url, String encoding) {

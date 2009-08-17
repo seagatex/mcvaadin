@@ -162,7 +162,11 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     @Override
     public Label label() {
         Label c = super.label();
-        c.setSizeUndefined();
+
+        // For other than vertical layouts the "undefined" size works as better default
+        if (!(c.getParent() instanceof VerticalLayout)) {
+            c.setSizeUndefined();
+        }
         return c;
     }
 
@@ -373,6 +377,8 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         }
     }
 
+
+
     // ---------------------------------------------------------------------------------------------------
     // --------------------------------- Key Binding Helpers
     // ---------------------------------------------------------------------------------------------------
@@ -453,6 +459,10 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     // --------------------------------- Data Binding Helpers
     // ---------------------------------------------------------------------------------------------------
     public Table bindData(Table table, Collection<?> data) {
+        if (data == null || data.size() == 0) {
+            table.setContainerDataSource(null);
+            return table;
+        }
         BeanItemContainer<Object> bic = new BeanItemContainer<Object>(data
                 .iterator().next().getClass());
         for (Object object : data) {
@@ -465,6 +475,10 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     public AbstractSelect bindData(AbstractSelect select, Collection<?> data,
             String captionPropertyId) {
+        if (data == null || data.size() == 0) {
+            select.setContainerDataSource(null);
+            return select;
+        }
         BeanItemContainer<Object> bic = new BeanItemContainer<Object>(data
                 .iterator().next().getClass());
         for (Object object : data) {
@@ -605,5 +619,4 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         c.setSortDisabled(false);
         return c;
     }
-
 }

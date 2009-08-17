@@ -1,5 +1,9 @@
 package com.googlecode.mcvaadin.helpers;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+
 import com.googlecode.mcvaadin.McEvent;
 import com.googlecode.mcvaadin.McListener;
 import com.googlecode.mcvaadin.McWindow;
@@ -39,6 +43,7 @@ public class UserMessages {
     static final String CONFIRM_TITLE = "Confirm";
     static final String CONFIRM_CANCEL_TITLE = "Cancel";
     static final String CONFIRM_OK_TITLE = "Ok";
+    static final int MAX_DESCRIPTION_LINES = 20;
 
     private Window win;
 
@@ -60,9 +65,20 @@ public class UserMessages {
 
     public void error(String message, String description, Throwable t) {
         if (t != null) {
+            ByteArrayOutputStream stos = new ByteArrayOutputStream();
+            PrintStream sto = new PrintStream(stos, false);
+            t.printStackTrace(sto);
+            sto.flush();
+            try {
+                stos.flush();
+            } catch (IOException ignored) {
+            }
+            String st = stos.toString();
             t.printStackTrace();
             if (description == null) {
-                description = t.getMessage();
+                description = st;
+            } else {
+                description += ":\n"+st;
             }
         }
         description = formatDescription(description);
@@ -97,10 +113,6 @@ public class UserMessages {
 
     private String formatDescription(String description) {
         if (description != null) {
-            // // TODO: Vaadin layout tweak
-            // if (!description.startsWith("\n")) {
-            // description = "\n" + description;
-            // }
             description = Utils.escapeXML(description);
             description = description.replaceAll("\n", "<br />");
             if (description.length() > 80) {
@@ -118,6 +130,17 @@ public class UserMessages {
                     }
                     orig = last == orig.length() ? "" : orig.substring(last);
                 }
+            }
+
+            // limit number of lines
+            int pos = description.indexOf("<br");
+            int lineCount = 1;
+            while (lineCount < MAX_DESCRIPTION_LINES && pos > 0 && pos < description.length()) {
+                pos = description.indexOf("<br",pos+3);
+                lineCount++;
+            }
+            if (pos > 0 && lineCount >= MAX_DESCRIPTION_LINES) {
+                description = description.substring(0,pos)+ "<br />(...)";
             }
         }
         return description;

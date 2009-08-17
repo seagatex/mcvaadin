@@ -10,7 +10,9 @@ import com.vaadin.Application;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.Action.Container;
 import com.vaadin.terminal.ParameterHandler;
+import com.vaadin.terminal.Terminal;
 import com.vaadin.terminal.URIHandler;
+import com.vaadin.terminal.Terminal.ErrorListener;
 import com.vaadin.ui.AbsoluteLayout;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Accordion;
@@ -183,6 +185,27 @@ public abstract class McApplication extends Application {
     public static McApplication current() {
         return ThreadLocalPattern.current();
     }
+
+    @Override
+    public ErrorListener getErrorHandler() {
+        return new Terminal.ErrorListener() {
+
+            private static final long serialVersionUID = 1L;
+
+            public void terminalError(
+                    com.vaadin.terminal.Terminal.ErrorEvent event) {
+                error("Unhandled Exception",event.getThrowable());
+            }
+
+        };
+    }
+
+    @Override
+    public void terminalError(com.vaadin.terminal.Terminal.ErrorEvent event) {
+        super.terminalError(event);
+        error("Unhandled Exception",event.getThrowable());
+    }
+
 
     /**
      * Function that builds up the content. This function is invoked from the

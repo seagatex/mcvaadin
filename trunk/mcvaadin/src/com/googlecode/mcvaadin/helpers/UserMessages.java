@@ -174,7 +174,7 @@ public class UserMessages implements Serializable {
     }
 
     public Window confirm(String title, String message, McListener listener) {
-        return confirm(CONFIRM_TITLE, message, CONFIRM_OK_TITLE,
+        return confirm(title, message, CONFIRM_OK_TITLE,
                 CONFIRM_CANCEL_TITLE, listener);
     }
 

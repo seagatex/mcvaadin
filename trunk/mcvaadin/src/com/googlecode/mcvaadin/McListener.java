@@ -3,6 +3,7 @@ package com.googlecode.mcvaadin;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.Map;
 
@@ -32,12 +33,12 @@ import com.vaadin.ui.Window.CloseEvent;
  * twice.
  *
  * If even more strict event filtering is desired see the {@link McUserListener}
- * .
+ *
  */
 public abstract class McListener implements Button.ClickListener,
         Property.ValueChangeListener, URIHandler, ParameterHandler,
         Upload.Receiver, Upload.FinishedListener, Table.ColumnGenerator,
-        Window.CloseListener {
+        Window.CloseListener, Serializable {
 
     /** Generated Serial Version UID. */
     private static final long serialVersionUID = 763117584566103799L;

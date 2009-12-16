@@ -1,5 +1,9 @@
 package com.googlecode.mcvaadin;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * This listener allows only the first listener (i.e. listener for a user
  * initiated event) in the executing thread to be triggered.
@@ -13,15 +17,12 @@ package com.googlecode.mcvaadin;
  *
  * @see McListener
  */
-public abstract class McUserListener extends McListener {
+public abstract class McUserListener extends McListener implements Serializable {
 
     private static final long serialVersionUID = -4745589022176838603L;
 
     // Listener state for the current thread
-    private static ThreadLocal<Boolean> userEventAlreadyProcessed = new ThreadLocal<Boolean>();
-    static {
-        userEventAlreadyProcessed.set(false);
-    }
+    private static ThreadLocal<Set<McUserListener>> userEventAlreadyProcessed = new ThreadLocal<Set<McUserListener>>();
 
     public McUserListener() {
         super();
@@ -29,14 +30,13 @@ public abstract class McUserListener extends McListener {
 
     @Override
     protected synchronized void execOnce(McEvent e) throws Exception {
-        if (userEventAlreadyProcessed.get() == null
-                || !userEventAlreadyProcessed.get()) {
-            try {
-                userEventAlreadyProcessed.set(true);
-                super.execOnce(e);
-            } finally {
-                userEventAlreadyProcessed.set(false);
-            }
+        if (userEventAlreadyProcessed.get() == null) {
+            userEventAlreadyProcessed.set(new HashSet<McUserListener>());
+        }
+
+        if (!userEventAlreadyProcessed.get().contains(this)) {
+            userEventAlreadyProcessed.get().add(this);
+            super.execOnce(e);
         }
     }
 

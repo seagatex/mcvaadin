@@ -1,5 +1,6 @@
 package com.googlecode.mcvaadin.helpers;
 
+import java.io.Serializable;
 import java.util.Stack;
 
 import com.googlecode.mcvaadin.McWindow;
@@ -43,7 +44,8 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
 /** Generated class. Do not edit by hand. */
-public class VaadinBuilder {
+public class VaadinBuilder implements Serializable {
+    private static final long serialVersionUID = -6219259387234621085L;
     protected ComponentContainer cc;
     private Stack<ComponentContainer> previousCCs = new Stack<ComponentContainer>();
 

@@ -10,11 +10,13 @@ import com.googlecode.mcvaadin.McComponent;
 import com.googlecode.mcvaadin.McEvent;
 import com.googlecode.mcvaadin.McListener;
 import com.googlecode.mcvaadin.McWindow;
+import com.vaadin.Application;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.Action;
 import com.vaadin.terminal.ExternalResource;
 import com.vaadin.terminal.ParameterHandler;
+import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.URIHandler;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.AbstractSelect;
@@ -22,6 +24,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ComponentContainer;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Form;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -62,14 +65,20 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     private static final long serialVersionUID = 3266450463409789028L;
 
+    protected static final Object CANCEL_CONFIRM = null;
+
     private UserMessages msg;
 
     private Translator translator;
 
     public UIBuilder(ComponentContainer cc) {
         super(cc);
-        msg = McApplication.current().getMsg();
-        translator = McApplication.current().getTranslator();
+        if (cc != null && cc.getApplication() instanceof McApplication) {
+            msg = ((McApplication)cc.getApplication()).getMsg();
+        } else if (McApplication.current() != null) {
+            msg = McApplication.current().getMsg();
+            translator = McApplication.current().getTranslator();
+        }
     }
 
     /** Create new builder with given root component container. */
@@ -80,13 +89,19 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     // The following functions require thread local pattern
 
     /**
-     * Get current application instance. This uses the thread local pattern and
-     * requires that application is inherited from the MCApplication class.
+     * Get current application instance. Tries to find the application by
+     * using ComponentContainer.getApplication(). If that fails it uses the
+     * thread local pattern and requires that application is inherited
+     * from the MCApplication class.
      *
      * @see #getWin()
      * @return application instance or null if not found.
      */
     public McApplication getApp() {
+    	Application a = cc.getApplication();
+    	if (a instanceof McApplication) {
+    		return (McApplication) a;
+    	}
         return McApplication.current();
     }
 
@@ -106,10 +121,44 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return null;
     }
 
-    // ---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
     // --------------------------------- Custom component constructors
-    // ---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
 
+    public Embedded browser(String url) {
+       	return embedded(new ExternalResource(url), Embedded.TYPE_BROWSER, -1, -1);
+    }
+
+    public Embedded img(String imgUrl) {
+    	return img(imgUrl,-1,-1);
+    }
+
+    public Embedded img(Resource imgResource) {
+    	return img(imgResource,-1,-1);
+    }
+
+    public Embedded img(String imgUrl, int width, int height) {
+    	return img(new ExternalResource(imgUrl),width,height);
+    }
+
+    public Embedded img(Resource imgResource, int width, int height) {
+    	return embedded(imgResource, Embedded.TYPE_IMAGE, width, height);
+    }
+
+    public Embedded embedded(Resource resource, int type, int width, int height) {
+    	Embedded c = embedded();
+    	c.setType(type);
+    	c.setSource(resource);
+    	if (width >= 0) {
+            c.setWidth(width + "px");
+        }
+    	if (height >= 0) {
+            c.setHeight(height + "px");
+        }
+        return c;
+    }
     /**
      * Override window for better defaults.
      *
@@ -163,9 +212,13 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     public Label label() {
         Label c = super.label();
 
-        // For other than vertical layouts the "undefined" size works as better default
+        // For other than vertical layouts the "undefined" size works as better
+        // default
         if (!(c.getParent() instanceof VerticalLayout)) {
             c.setSizeUndefined();
+        }
+        if (c.getParent() instanceof HorizontalLayout) {
+            align(c, Alignment.BOTTOM_LEFT);
         }
         return c;
     }
@@ -260,7 +313,9 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
             final McListener listener) {
         Button b = button(caption, new McListener() {
 
-            @Override
+			private static final long serialVersionUID = 1L;
+
+			@Override
             public void exec(McEvent e) throws Exception {
                 confirm(caption, description, okCaption, cancelCaption,
                         listener);
@@ -342,6 +397,54 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return c;
     }
 
+    @Override
+    public HorizontalLayout horizontallayout() {
+        HorizontalLayout c = super.horizontallayout();
+        c.setSpacing(true);
+        return c;
+    }
+
+    @Override
+    public VerticalLayout verticallayout() {
+        VerticalLayout c = super.verticallayout();
+        c.setSpacing(true);
+        return c;
+    }
+
+    /**
+     * Create and select a HorizontalLayout.
+     *
+     * This is the same as <code>with(horizontallayout())</code>.
+     *
+     * @return
+     */
+    public HorizontalLayout horizontal() {
+        HorizontalLayout c = horizontallayout();
+        with(c);
+        return c;
+    }
+
+    /**
+     * Create and select a HorizontalLayout.
+     *
+     * This is the same as <code>with(verticallayout())</code>.
+     *
+     * @return
+     */
+    public VerticalLayout vertical() {
+        VerticalLayout c = verticallayout();
+        with(c);
+        return c;
+    }
+
+    @Override
+    public Table table() {
+        Table c = super.table();
+        c.setSelectable(true);
+        c.setSortDisabled(false);
+        return c;
+    }
+
     /**
      * Set component alignment.
      *
@@ -377,11 +480,11 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         }
     }
 
-
-
-    // ---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
     // --------------------------------- Key Binding Helpers
-    // ---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
 
     /**
      * Bind a keyboard key to a button.
@@ -396,7 +499,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
      *
      */
     public Button bindKey(Button b, int key, int modifier) {
-        return bindKey(b, key, new int[] {modifier});
+        return bindKey(b, key, new int[] { modifier });
     }
 
     /**
@@ -431,8 +534,8 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
             @Override
             public void exec(McEvent e) throws Exception {
                 // We click the button by simulating a client-side event.
-                Map vars = new HashMap();
-                vars.put("state",new Boolean(!(Boolean)b.getValue()));
+                Map<Object,Object> vars = new HashMap<Object,Object>();
+                vars.put("state", new Boolean(!(Boolean) b.getValue()));
                 b.changeVariables(this, vars);
             }
         });
@@ -441,23 +544,27 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     }
 
     /**
-     * Bind a keyboard key to a button. This finds the parent of this button
-     * that supports keyboard listener and installs a listener there to invoke
-     * when desired key combination is pressed.
+     * Bind a keyboard key to an Action.Container. Creates an Action.Handler
+     * implementation that is returned.
      *
      * @param actionContainer
      * @param key
      * @param modifiers
+     * @return An Action.Handler implementation
      */
-    public void bindKey(Action.Container actionContainer, int key,
+    public Action.Handler bindKey(Action.Container actionContainer, int key,
             int[] modifiers, McListener listener) {
-        actionContainer.addActionHandler(new KeyboardHandlerImpl(key,
-                modifiers, listener));
+        KeyboardHandlerImpl r = new KeyboardHandlerImpl(key, modifiers,
+                listener);
+        actionContainer.addActionHandler(r);
+        return r;
     }
 
-    // ---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
     // --------------------------------- Data Binding Helpers
-    // ---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
     public Table bindData(Table table, Collection<?> data) {
         if (data == null || data.size() == 0) {
             table.setContainerDataSource(null);
@@ -499,9 +606,11 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return form;
     }
 
-    // ---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
     // --------------------------------- Delegate Functions for translator
-    // ---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
 
     public String getResourceBundleName() {
         return translator.getResourceBundleName();
@@ -519,9 +628,11 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return translator.tr(str);
     }
 
-    // ---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
     // --------------------------------- Delegate Functions for user messages
-    // ---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
 
     public void alert(String message, String description) {
         msg.alert(message, description);
@@ -572,51 +683,26 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         msg.notification(message);
     }
 
-    @Override
-    public HorizontalLayout horizontallayout() {
-        HorizontalLayout c = super.horizontallayout();
-        c.setSpacing(true);
-        return c;
+    public void trayNotification(String message, String description) {
+        msg.trayNotification(message, description);
     }
 
-    @Override
-    public VerticalLayout verticallayout() {
-        VerticalLayout c = super.verticallayout();
-        c.setSpacing(true);
-        return c;
+    public void trayNotification(String message) {
+        msg.trayNotification(message);
     }
 
-    /**
-     * Create and select a HorizontalLayout.
-     *
-     * This is the same as <code>with(horizontallayout())</code>.
-     *
-     * @return
-     */
-    public HorizontalLayout horizontal() {
-        HorizontalLayout c = horizontallayout();
-        with(c);
-        return c;
+    public void warning(String message, String description) {
+        msg.warning(message, description);
     }
 
-    /**
-     * Create and select a HorizontalLayout.
-     *
-     * This is the same as <code>with(verticallayout())</code>.
-     *
-     * @return
-     */
-    public VerticalLayout vertical() {
-        VerticalLayout c = verticallayout();
-        with(c);
-        return c;
+    public void warning(String message) {
+        msg.warning(message);
     }
 
-    @Override
-    public Table table() {
-        Table c = super.table();
-        c.setSelectable(true);
-        c.setSortDisabled(false);
-        return c;
-    }
+    //--------------------------------------------------------------------------
+    // -------------------------
+    // ---------------------------------
+    //--------------------------------------------------------------------------
+    // -------------------------
+
 }

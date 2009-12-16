@@ -20,9 +20,6 @@ import java.util.Properties;
  * */
 public class Conf extends Properties {
 
-    /**
-	 *
-	 */
     private static final long serialVersionUID = 2182760123424116435L;
     private boolean loaded;
     private List<String> available = new ArrayList<String>();
@@ -39,7 +36,7 @@ public class Conf extends Properties {
      */
     public Conf(Object obj, String fieldPrefix) {
         Class<?> cls = obj.getClass();
-        if (obj instanceof Class) {
+        if (obj instanceof Class<?>) {
             cls = (Class<?>) obj;
         }
         available = listStaticStrings(cls, fieldPrefix);

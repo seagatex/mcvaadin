@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
@@ -48,8 +49,9 @@ import com.vaadin.ui.Component;
  * free to use them elsewhere also.
  *
  */
-public class Utils {
+public class Utils implements Serializable {
 
+    private static final long serialVersionUID = -6535011681711775216L;
     public static final Charset CSV_CHARSET = Charset.forName("ISO-8859-1");
     public static final char CSV_DELIMITER = ';';
     public static final String VALID_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -75,6 +77,10 @@ public class Utils {
         return str == null ? null
                 : com.vaadin.terminal.gwt.server.JsonPaintTarget
                         .escapeJSON(str);
+    }
+
+    public static String escapeURL(String str) {
+        return str == null ? null : URLEncode(str);
     }
 
     public static String format(String message, Object... arguments) {
@@ -246,7 +252,18 @@ public class Utils {
         return null;
     }
 
+    public static Set<Class<?>> getClassesForPackage(String pckgname,
+            boolean includeInnerClasses) throws ClassNotFoundException {
+        return getClassesForPackage(pckgname, null, includeInnerClasses);
+    }
+
     public static Set<Class<?>> getClassesForPackage(String pckgname)
+            throws ClassNotFoundException {
+        return getClassesForPackage(pckgname, null, false);
+    }
+
+    public static Set<Class<?>> getClassesForPackage(String pckgname,
+            ClassLoader loader, boolean includeInnerClasses)
             throws ClassNotFoundException {
         // This will hold a list of directories matching the pckgname.
         // There may be more than one if a package is split over multiple
@@ -254,7 +271,8 @@ public class Utils {
         Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
         ArrayList<File> directories = new ArrayList<File>();
         try {
-            ClassLoader cld = Thread.currentThread().getContextClassLoader();
+            ClassLoader cld = loader != null ? loader : Thread.currentThread()
+                    .getContextClassLoader();
             if (cld == null) {
                 throw new ClassNotFoundException("Can't get class loader.");
             }
@@ -270,12 +288,19 @@ public class Utils {
                     for (JarEntry e : Collections.list(jar.entries())) {
 
                         if (e.getName().startsWith(pkgPath)
-                                && e.getName().endsWith(".class")
-                                && !e.getName().contains("$")) {
+                                && e.getName().endsWith(".class")) {
                             String className = e.getName().replace("/", ".")
                                     .substring(0, e.getName().length() - 6);
+
+                            // Innerclass hanling
+                            if (className.contains("$") && !includeInnerClasses) {
+                                continue;
+                            }
+
                             try {
-                                classes.add(Class.forName(className));
+                                classes.add(loader != null ? loader
+                                        .loadClass(className) : Class
+                                        .forName(className));
                             } catch (NoClassDefFoundError ignored) {
                             } catch (UnsatisfiedLinkError ignored) {
                             }
@@ -349,6 +374,27 @@ public class Utils {
             }
         }
         return true;
+    }
+
+    /**
+     * Count number of string matches in another string.
+     *
+     * @param lookFor
+     * @param inString
+     * @return
+     */
+    public static int countOf(String lookFor, String inString) {
+        if (lookFor == null || inString == null) {
+            return 0;
+        }
+        int lfLen = lookFor.length();
+        int count = 0;
+        int pos = 0;
+        while ((pos = inString.indexOf(lookFor, pos)) >= 0) {
+            count++;
+            pos += lfLen;
+        }
+        return count;
     }
 
     public static String toHexString(byte[] data) {
@@ -426,6 +472,15 @@ public class Utils {
     public static String URLEncode(String str) {
         try {
             return URLEncoder.encode(str, DEFAULT_STRING_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String URLDecode(String str) {
+        try {
+            return URLDecoder.decode(str, DEFAULT_STRING_ENCODING);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

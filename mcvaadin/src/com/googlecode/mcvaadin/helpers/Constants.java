@@ -1,12 +1,14 @@
 package com.googlecode.mcvaadin.helpers;
 
+import java.io.Serializable;
+
 import com.vaadin.ui.SplitPanel;
 
 /**
  * McVaadin constants and defaults.
  *
  */
-public interface Constants {
+public interface Constants extends Serializable {
 
     static final int SPLIT_HORIZONTAL = SplitPanel.ORIENTATION_HORIZONTAL;
     static final int SPLIT_VERTICAL = SplitPanel.ORIENTATION_VERTICAL;

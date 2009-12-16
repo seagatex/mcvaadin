@@ -1,12 +1,14 @@
 package com.googlecode.mcvaadin.helpers;
 
+import java.io.Serializable;
+
 import com.googlecode.mcvaadin.McEvent;
 import com.googlecode.mcvaadin.McListener;
 import com.vaadin.event.Action;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.Action.Handler;
 
-public class KeyboardHandlerImpl implements Handler {
+public class KeyboardHandlerImpl implements Handler, Serializable {
 
     private static final long serialVersionUID = 1867655708565732838L;
     private Action[] acts;

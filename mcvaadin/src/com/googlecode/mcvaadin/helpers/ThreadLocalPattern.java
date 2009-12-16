@@ -1,5 +1,7 @@
 package com.googlecode.mcvaadin.helpers;
 
+import java.io.Serializable;
+
 import com.googlecode.mcvaadin.McApplication;
 import com.vaadin.Application;
 import com.vaadin.service.ApplicationContext;
@@ -12,7 +14,7 @@ import com.vaadin.service.ApplicationContext;
  *
  */
 public class ThreadLocalPattern implements
-        ApplicationContext.TransactionListener {
+        ApplicationContext.TransactionListener, Serializable {
 
     private static final long serialVersionUID = 5391709280076063498L;
     private static ThreadLocal<McApplication> current = new ThreadLocal<McApplication>();

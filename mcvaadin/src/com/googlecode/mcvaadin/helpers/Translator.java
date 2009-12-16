@@ -1,8 +1,9 @@
 package com.googlecode.mcvaadin.helpers;
 
+import java.io.Serializable;
 import java.util.ResourceBundle;
 
-public class Translator {
+public class Translator implements Serializable {
 
     private static final long serialVersionUID = 8605713237416911763L;
 

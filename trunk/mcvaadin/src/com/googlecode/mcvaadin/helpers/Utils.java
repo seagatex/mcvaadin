@@ -44,10 +44,10 @@ import com.vaadin.ui.Component;
 
 /**
  * A set of generic utility functions.
- *
+ * 
  * These functions are used internally by various McVaadin components, but feel
  * free to use them elsewhere also.
- *
+ * 
  */
 public class Utils implements Serializable {
 
@@ -361,7 +361,9 @@ public class Utils implements Serializable {
     }
 
     public static boolean isValidEmail(String text) {
-        return !isEmpty(text) && containsOnly(text, VALID_EMAIL_CHARACTERS);
+        return !isEmpty(text) && containsOnly(text, VALID_EMAIL_CHARACTERS)
+                && countOf("@",text) == 1 && text.indexOf('@') > 0
+                && text.indexOf('@') < text.lastIndexOf('.');
     }
 
     public static boolean containsOnly(String text, String valid) {
@@ -378,7 +380,7 @@ public class Utils implements Serializable {
 
     /**
      * Count number of string matches in another string.
-     *
+     * 
      * @param lookFor
      * @param inString
      * @return
@@ -490,7 +492,7 @@ public class Utils implements Serializable {
     /**
      * Serialize properties into single (multiline) string. This is not meant to
      * be human readable
-     *
+     * 
      * @see #stringToProperties(String)
      * @param props
      *            Properties to be convert.
@@ -513,7 +515,7 @@ public class Utils implements Serializable {
 
     /**
      * Load properties from single (multiline) string.
-     *
+     * 
      * @param string
      *            String containing properties.
      * @return Properties from given string
@@ -534,7 +536,7 @@ public class Utils implements Serializable {
     /**
      * Serialize properties into single (multiline) string. This is method
      * creates sorted, human readable (non-escaped) string suitable for UI.
-     *
+     * 
      * @see #stringToProperties(String)
      * @param props
      *            Properties to be convert.
@@ -558,6 +560,26 @@ public class Utils implements Serializable {
         }
         p.close();
         return out.toString();
+    }
+
+    /**
+     * Create a string by repeating the given string.
+     * 
+     * @param string
+     *            The String to repeat
+     * @param count
+     *            Repeat count 1 or greater.
+     * @return Returns null if original string was null, empty string if count
+     *         was 0 and repeated string otherwise.
+     */
+    public static String repeat(String string, int count) {
+        if (string == null)
+            return null;
+        StringBuffer res = new StringBuffer();
+        for (int j = 0; j < count; j++) {
+            res.append(string);
+        }
+        return res.toString();
     }
 
     // public static int parseInt(TextField tf, int defaultValue) {

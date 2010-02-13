@@ -40,7 +40,7 @@ import com.vaadin.ui.Layout.AlignmentHandler;
 
 /**
  * User interface factory class.
- *
+ * 
  * This class offers factory functions to build a user interface in a linear
  * way. Each Vaadin component (and McVaadin extension component) has a function
  * counterpart in this class that creates a new instance of it and adds it to
@@ -54,7 +54,6 @@ import com.vaadin.ui.Layout.AlignmentHandler;
  * with {@link #endWith()} function.
  * <p>
  * There also is a set of functions to help displaying user messages more
- * conveniently as specified in {@link UserMessages} class.
  * <p>
  * As you may use this class separately to build UI in any Vaadin application,
  * it is meant to be used to through the {@link McApplication}, {@link McWindow}
@@ -74,7 +73,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     public UIBuilder(ComponentContainer cc) {
         super(cc);
         if (cc != null && cc.getApplication() instanceof McApplication) {
-            msg = ((McApplication)cc.getApplication()).getMsg();
+            msg = ((McApplication) cc.getApplication()).getMsg();
         } else if (McApplication.current() != null) {
             msg = McApplication.current().getMsg();
             translator = McApplication.current().getTranslator();
@@ -89,19 +88,19 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     // The following functions require thread local pattern
 
     /**
-     * Get current application instance. Tries to find the application by
-     * using ComponentContainer.getApplication(). If that fails it uses the
-     * thread local pattern and requires that application is inherited
-     * from the MCApplication class.
-     *
+     * Get current application instance. Tries to find the application by using
+     * ComponentContainer.getApplication(). If that fails it uses the thread
+     * local pattern and requires that application is inherited from the
+     * MCApplication class.
+     * 
      * @see #getWin()
      * @return application instance or null if not found.
      */
     public McApplication getApp() {
-    	Application a = cc.getApplication();
-    	if (a instanceof McApplication) {
-    		return (McApplication) a;
-    	}
+        Application a = cc.getApplication();
+        if (a instanceof McApplication) {
+            return (McApplication) a;
+        }
         return McApplication.current();
     }
 
@@ -109,7 +108,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
      * Get the main window of current application. This is effectively same as
      * getApp().getMainWindow(). See requirements for application in
      * {@link #getApp()}.
-     *
+     * 
      * @see #getApp()
      * @return Main window instance or null if not found.
      */
@@ -121,47 +120,67 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return null;
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
     // --------------------------------- Custom component constructors
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
 
+    /** Create new McWindow and add it to current component container. */
+    public McWindow mcwindow() {
+        McWindow c = new McWindow();
+        c.setImmediate(true);
+        add(c);
+        return c;
+    }
+
+    /**
+     * Create new McWindow with given caption and add it to current component
+     * container.
+     */
+    public McWindow mcwindow(String caption) {
+        McWindow c = mcwindow();
+        c.setCaption(caption);
+        return c;
+    }
+
     public Embedded browser(String url) {
-       	return embedded(new ExternalResource(url), Embedded.TYPE_BROWSER, -1, -1);
+        return embedded(new ExternalResource(url), Embedded.TYPE_BROWSER, -1,
+                -1);
     }
 
     public Embedded img(String imgUrl) {
-    	return img(imgUrl,-1,-1);
+        return img(imgUrl, -1, -1);
     }
 
     public Embedded img(Resource imgResource) {
-    	return img(imgResource,-1,-1);
+        return img(imgResource, -1, -1);
     }
 
     public Embedded img(String imgUrl, int width, int height) {
-    	return img(new ExternalResource(imgUrl),width,height);
+        return img(new ExternalResource(imgUrl), width, height);
     }
 
     public Embedded img(Resource imgResource, int width, int height) {
-    	return embedded(imgResource, Embedded.TYPE_IMAGE, width, height);
+        return embedded(imgResource, Embedded.TYPE_IMAGE, width, height);
     }
 
     public Embedded embedded(Resource resource, int type, int width, int height) {
-    	Embedded c = embedded();
-    	c.setType(type);
-    	c.setSource(resource);
-    	if (width >= 0) {
+        Embedded c = embedded();
+        c.setType(type);
+        c.setSource(resource);
+        if (width >= 0) {
             c.setWidth(width + "px");
         }
-    	if (height >= 0) {
+        if (height >= 0) {
             c.setHeight(height + "px");
         }
         return c;
     }
+
     /**
      * Override window for better defaults.
-     *
+     * 
      */
     @Override
     public Window window() {
@@ -204,9 +223,23 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return c;
     }
 
+    public Label spacer(String w, String h) {
+        Label c = new Label();
+        add(c);
+        c.setContentMode(Label.CONTENT_RAW);
+        c.setValue("&nbsp;");
+        c.setHeight(h);
+        c.setWidth(w);
+        return c;
+    }
+
+    public Label spacer(int em) {
+        return spacer(em+"em",em+"em");
+    }
+
     /**
      * We set the size undefined by default.
-     *
+     * 
      */
     @Override
     public Label label() {
@@ -241,7 +274,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Create a textfield of given caption and default value.
-     *
+     * 
      * @param caption
      * @param value
      * @return
@@ -254,7 +287,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Create a textfield of given size and default value.
-     *
+     * 
      * @param caption
      * @param value
      * @param cols
@@ -269,7 +302,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Create a textfield of given size and default value.
-     *
+     * 
      * @param caption
      * @param value
      * @param cols
@@ -300,7 +333,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     /**
      * Create a "confirmed button". The user is presented a confirmation message
      * before the event is sent and listener invoked.
-     *
+     * 
      * @param caption
      * @param description
      * @param okCaption
@@ -313,9 +346,9 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
             final McListener listener) {
         Button b = button(caption, new McListener() {
 
-			private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 1L;
 
-			@Override
+            @Override
             public void exec(McEvent e) throws Exception {
                 confirm(caption, description, okCaption, cancelCaption,
                         listener);
@@ -327,7 +360,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     /**
      * Create a "confirmed" button. The user is presented a confirmation before
      * the click event is sent.
-     *
+     * 
      * @param caption
      * @param description
      * @param listener
@@ -340,7 +373,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Add an {@link URIHandler} to current window.
-     *
+     * 
      * @param handler
      */
     public void addUriHandler(URIHandler handler) {
@@ -356,7 +389,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Add a {@link ParameterHandler} to current window.
-     *
+     * 
      * @param handler
      */
     public void addParamHandler(ParameterHandler handler) {
@@ -372,7 +405,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Create a new link.
-     *
+     * 
      * @param linkText
      * @param linkUrl
      * @param targetName
@@ -387,7 +420,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Override to put spacing on by default.
-     *
+     * 
      */
     @Override
     public Panel panel() {
@@ -413,9 +446,9 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Create and select a HorizontalLayout.
-     *
+     * 
      * This is the same as <code>with(horizontallayout())</code>.
-     *
+     * 
      * @return
      */
     public HorizontalLayout horizontal() {
@@ -426,9 +459,9 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Create and select a HorizontalLayout.
-     *
+     * 
      * This is the same as <code>with(verticallayout())</code>.
-     *
+     * 
      * @return
      */
     public VerticalLayout vertical() {
@@ -447,11 +480,11 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Set component alignment.
-     *
+     * 
      * If the currently focused component container implements the
      * {@link AlignmentHandler}, this function applies the requested alignment
      * to given sub-component.
-     *
+     * 
      * @param component
      * @param alignment
      */
@@ -464,11 +497,11 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Set component expand ratio.
-     *
+     * 
      * If the currently focused component container implements the
      * {@link AbstractOrderedLayout}, this function applies the requested expand
      * ratio for the given sub-component.
-     *
+     * 
      * @param component
      * @param ratio
      * @see AbstractOrderedLayout
@@ -480,15 +513,15 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         }
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
     // --------------------------------- Key Binding Helpers
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
 
     /**
      * Bind a keyboard key to a button.
-     *
+     * 
      */
     public Button bindKey(Button b, int key) {
         return bindKey(b, key, null);
@@ -496,7 +529,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
 
     /**
      * Bind a keyboard key to a button.
-     *
+     * 
      */
     public Button bindKey(Button b, int key, int modifier) {
         return bindKey(b, key, new int[] { modifier });
@@ -507,7 +540,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
      * parent of this button that supports keyboard listener and installs a
      * listener there to invoke a button click when desired key combination is
      * pressed.
-     *
+     * 
      * @param b
      * @param key
      * @param modifiers
@@ -534,7 +567,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
             @Override
             public void exec(McEvent e) throws Exception {
                 // We click the button by simulating a client-side event.
-                Map<Object,Object> vars = new HashMap<Object,Object>();
+                Map<Object, Object> vars = new HashMap<Object, Object>();
                 vars.put("state", new Boolean(!(Boolean) b.getValue()));
                 b.changeVariables(this, vars);
             }
@@ -546,7 +579,7 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
     /**
      * Bind a keyboard key to an Action.Container. Creates an Action.Handler
      * implementation that is returned.
-     *
+     * 
      * @param actionContainer
      * @param key
      * @param modifiers
@@ -560,10 +593,10 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return r;
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
     // --------------------------------- Data Binding Helpers
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
     public Table bindData(Table table, Collection<?> data) {
         if (data == null || data.size() == 0) {
@@ -606,10 +639,10 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return form;
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
     // --------------------------------- Delegate Functions for translator
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
 
     public String getResourceBundleName() {
@@ -628,10 +661,10 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         return translator.tr(str);
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
     // --------------------------------- Delegate Functions for user messages
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
 
     public void alert(String message, String description) {
@@ -699,10 +732,10 @@ public class UIBuilder extends VaadinBuilder implements Serializable {
         msg.warning(message);
     }
 
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
     // ---------------------------------
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
     // -------------------------
 
 }

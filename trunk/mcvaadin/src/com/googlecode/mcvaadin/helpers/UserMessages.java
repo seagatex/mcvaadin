@@ -217,7 +217,7 @@ public class UserMessages implements Serializable {
         // Approximate the size of the dialog
         int chrW = 5;
         int chrH = 15;
-        int txtWidth = Math.max(150, Math.min(300, message.length() * chrW));
+        int txtWidth = Math.max(250, Math.min(350, message.length() * chrW));
         int btnHeight = 25;
         int vmargin = 100;
         int hmargin = 40;
